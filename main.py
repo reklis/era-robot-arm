@@ -4,10 +4,10 @@ import os
 import signal
 import atexit
 
-app = Flask(__name__)
-
 # Initialize LED on GPIO 18
 led = LED(18)
+
+app = Flask(__name__)
 
 # GPIO cleanup functions
 def cleanup_gpio():
@@ -65,5 +65,5 @@ def get_led_status():
 
 if __name__ == '__main__':
     # Run the Flask app on port 5000
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
 
