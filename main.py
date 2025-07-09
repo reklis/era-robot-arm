@@ -1,11 +1,33 @@
 from flask import Flask, send_from_directory, jsonify
 from gpiozero import LED
 import os
+import signal
+import atexit
 
 app = Flask(__name__)
 
 # Initialize LED on GPIO 18
 led = LED(18)
+
+# GPIO cleanup functions
+def cleanup_gpio():
+    """Clean up GPIO resources"""
+    try:
+        led.close()
+        print("GPIO resources cleaned up successfully")
+    except Exception as e:
+        print(f"Error during GPIO cleanup: {e}")
+
+def signal_handler(signum, frame):
+    """Handle shutdown signals"""
+    print(f"Received signal {signum}, cleaning up...")
+    cleanup_gpio()
+    exit(0)
+
+# Register cleanup handlers
+atexit.register(cleanup_gpio)
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 # Serve static files from the public folder
 @app.route('/')
