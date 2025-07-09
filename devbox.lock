@@ -1,0 +1,57 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "last_modified": "2025-06-27T03:16:46Z",
+      "resolved": "github:NixOS/nixpkgs/80d50fc87924c2a0d346372d242c27973cf8cdbf?lastModified=1750994206&narHash=sha256-3u6rEbIX9CN%2F5A5%2Fmc3u0wIO1geZ0EhjvPBXmRDHqWM%3D"
+    },
+    "uv@latest": {
+      "last_modified": "2025-07-04T02:32:11Z",
+      "resolved": "github:NixOS/nixpkgs/472908faa934435cf781ae8fac77291af3d137d3#uv",
+      "source": "devbox-search",
+      "version": "0.7.19",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wqsjqa8jj9ncm8kphpazc17c3ixwpmsl-uv-0.7.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wqsjqa8jj9ncm8kphpazc17c3ixwpmsl-uv-0.7.19"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4xnxw14jj9x0dcpy0vybrpa2fyikddgq-uv-0.7.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4xnxw14jj9x0dcpy0vybrpa2fyikddgq-uv-0.7.19"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/07wkg06d2ns86v93zg8f4k29d4lig2nb-uv-0.7.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/07wkg06d2ns86v93zg8f4k29d4lig2nb-uv-0.7.19"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/hmc2i2v7f3y6cpn4ydrbf4aki5rr1564-uv-0.7.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/hmc2i2v7f3y6cpn4ydrbf4aki5rr1564-uv-0.7.19"
+        }
+      }
+    }
+  }
+}

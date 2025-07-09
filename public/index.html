@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERA Robot Arm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .led-control {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .led-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .led-on {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .led-off {
+            background-color: #f44336;
+            color: white;
+        }
+        .led-button:hover {
+            opacity: 0.8;
+        }
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status.on {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.off {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ERA Robot Arm Control</h1>
+        
+        <div class="led-control">
+            <button class="led-button led-on" onclick="controlLED('on')">Turn LED ON</button>
+            <button class="led-button led-off" onclick="controlLED('off')">Turn LED OFF</button>
+        </div>
+        
+        <div id="status" class="status off">
+            LED Status: OFF
+        </div>
+    </div>
+
+    <script>
+        function controlLED(action) {
+            fetch(`/led/${action}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const statusDiv = document.getElementById('status');
+                if (data.success) {
+                    statusDiv.textContent = `LED Status: ${action.toUpperCase()}`;
+                    statusDiv.className = `status ${action}`;
+                } else {
+                    alert('Error controlling LED: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error controlling LED');
+            });
+        }
+    </script>
+</body>
+</html> 

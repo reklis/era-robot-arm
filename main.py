@@ -1,11 +1,47 @@
+from flask import Flask, send_from_directory, jsonify
 from gpiozero import LED
-from time import sleep
+import os
 
+app = Flask(__name__)
+
+# Initialize LED on GPIO 18
 led = LED(18)
 
-while True:
-    led.on()
-    sleep(0.5)
-    led.off()
-    sleep(0.5)
+# Serve static files from the public folder
+@app.route('/')
+def index():
+    return send_from_directory('public', 'index.html')
+
+@app.route('/<path:filename>')
+def static_files(filename):
+    return send_from_directory('public', filename)
+
+# LED control endpoints
+@app.route('/led/<action>', methods=['POST'])
+def control_led(action):
+    try:
+        if action == 'on':
+            led.on()
+            return jsonify({'success': True, 'message': 'LED turned ON'})
+        elif action == 'off':
+            led.off()
+            return jsonify({'success': True, 'message': 'LED turned OFF'})
+        else:
+            return jsonify({'success': False, 'error': 'Invalid action. Use "on" or "off"'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+# Get LED status
+@app.route('/led/status', methods=['GET'])
+def get_led_status():
+    try:
+        # Note: gpiozero doesn't have a direct way to check LED state
+        # This is a simplified implementation
+        return jsonify({'success': True, 'status': 'unknown'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+if __name__ == '__main__':
+    # Run the Flask app on port 5000
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
