@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -ex
+
 if [ -d "pigpio" ]; then
-    rm -rf pigpio
+    sudo rm -rf pigpio
 fi
 
 git clone https://github.com/joan2937/pigpio.git
