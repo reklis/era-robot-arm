@@ -4,8 +4,8 @@ import os
 import signal
 import atexit
 
-# Initialize LED on GPIO 18
 led = LED(18)
+claw = Servo(12, min_pulse_width=0.0005, max_pulse_width=0.0025)
 
 app = Flask(__name__)
 
@@ -14,6 +14,7 @@ def cleanup_gpio():
     """Clean up GPIO resources"""
     try:
         led.close()
+        claw.detach()
         print("GPIO resources cleaned up successfully")
     except Exception as e:
         print(f"Error during GPIO cleanup: {e}")
@@ -63,6 +64,17 @@ def get_led_status():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+
+@app.route('/claw', methods=['POST'])
+def set_claw():
+    try:
+        value = float(request.json.get('value'))
+        value = max(-1.0, min(1.0, value))  # Clamp
+        claw.value = value
+        return jsonify({'success': True, 'value': value})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
 if __name__ == '__main__':
     # Run the Flask app on port 5000
     app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
