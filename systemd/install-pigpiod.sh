@@ -6,7 +6,7 @@ make
 sudo make install
 
 cd ..
-cp pigpiod.service /etc/systemd/system/pigpiod.service
+sudo cp pigpiod.service /etc/systemd/system/pigpiod.service
 sudo systemctl daemon-reload
 sudo systemctl enable pigpiod
 sudo systemctl start pigpiod
