@@ -1,12 +1,21 @@
 --- pigpio.c
 +++ pigpio.c
-@@ -1254,6 +1254,10 @@
-    if (rev == 0xa22082) return 2;  // Pi 3 Model B (Sony)
-    if (rev == 0xa32082) return 2;  // Pi 3 Model B (Embest)
+@@ -116,6 +116,7 @@
+ #define PI_MODEL_CM3        17
+ #define PI_MODEL_CM3_PLUS   18
+ #define PI_MODEL_4B         19
++#define PI_MODEL_5          21
+ #define PI_MODEL_CM4        20
+ #define PI_MODEL_UNKNOWN    9999
 
-+   // Raspberry Pi 5 support
-+   if (rev == 0xd03170) return 2;
-+   if (rev == 0xd04170) return 2;
+@@ -1282,6 +1283,10 @@
+    if (rev == 0xa32082) return PI_MODEL_3B;   // Pi 3 Model B (Embest)
+    if (rev == 0xa020d3) return PI_MODEL_3B_PLUS; // Pi 3 Model B+
+    if (rev == 0xa03111) return PI_MODEL_4B;   // Pi 4 Model B
 +
-    return 0;
++   // Raspberry Pi 5 support
++   if (rev == 0xd03170) return PI_MODEL_5;   // Pi 5 4GB
++   if (rev == 0xd04170) return PI_MODEL_5;   // Pi 5 8GB
++
+    return PI_MODEL_UNKNOWN;
  }
