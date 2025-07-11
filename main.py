@@ -72,7 +72,7 @@ def set_claw():
 @app.route('/m1/move', methods=['POST'])
 def move_m1():
     try:
-        m1.move(request.json.get('steps'), request.json.get('direction'))
+        m1.step(request.json.get('steps'), request.json.get('direction'))
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
