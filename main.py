@@ -1,52 +1,41 @@
 from flask import Flask, send_from_directory, jsonify, request
-import RPi.GPIO as GPIO
 import os
 import signal
 import atexit
-
-
-app = Flask(__name__)
-
-
-import RPi.GPIO as GPIO
+import pigpio
 import time
 
 class StepperMotor:
-    def __init__(self, dir_pin, pul_pin, delay=0.001):
+    def __init__(self, pi, dir_pin, step_pin, delay=0.001):
         """
-        Initialize the motor control object.
-        :param dir_pin: GPIO pin number for DIR−
-        :param step_pin: GPIO pin number for PUL−
-        :param delay: Delay between steps (in seconds)
+        :param pi: pigpio.pi() instance
+        :param dir_pin: GPIO pin for DIR−
+        :param step_pin: GPIO pin for PUL−
+        :param delay: time between steps (controls speed)
         """
+        self.pi = pi
         self.dir_pin = dir_pin
-        self.step_pin = pul_pin
-        self.delay = delay  # Default speed = 1ms = 500 steps/sec
+        self.step_pin = step_pin
+        self.delay = delay
 
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.dir_pin, GPIO.OUT)
-        GPIO.setup(self.step_pin, GPIO.OUT)
+        pi.set_mode(self.dir_pin, pigpio.OUTPUT)
+        pi.set_mode(self.step_pin, pigpio.OUTPUT)
 
     def move(self, steps, direction='forward'):
-        """
-        Move the motor a given number of steps.
-        :param steps: Number of steps to move
-        :param direction: 'forward' or 'backward'
-        """
-        dir_state = GPIO.HIGH if direction == 'forward' else GPIO.LOW
-        GPIO.output(self.dir_pin, dir_state)
-
+        self.pi.write(self.dir_pin, 1 if direction == 'forward' else 0)
         for _ in range(steps):
-            GPIO.output(self.step_pin, GPIO.HIGH)
+            self.pi.write(self.step_pin, 1)
             time.sleep(self.delay)
-            GPIO.output(self.step_pin, GPIO.LOW)
+            self.pi.write(self.step_pin, 0)
             time.sleep(self.delay)
 
     def cleanup(self):
-        """
-        Clean up GPIO state.
-        """
-        GPIO.cleanup([self.dir_pin, self.step_pin])
+        self.pi.write(self.dir_pin, 0)
+        self.pi.write(self.step_pin, 0)
+
+
+
+app = Flask(__name__)
 
 
 # GPIO cleanup functions
@@ -69,7 +58,8 @@ atexit.register(cleanup_gpio)
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-m1 = StepperMotor(dir_pin=17, pul_pin=27, delay=0.001)
+pi = pigpio.pi()
+m1 = StepperMotor(pi, dir_pin=17, step_pin=27)
 
 @app.route('/')
 def index():
