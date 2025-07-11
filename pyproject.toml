@@ -8,6 +8,5 @@ dependencies = [
     "flask>=3.1.1",
     "gpiozero>=2.0.1",
     "pigpio>=1.78",
-    "rpi-gpio>=0.7.1",
     "rpi-lgpio>=0.6",
 ]

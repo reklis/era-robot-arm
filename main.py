@@ -2,38 +2,29 @@ from flask import Flask, send_from_directory, jsonify, request
 import os
 import signal
 import atexit
-import pigpio
 import time
+from gpiozero import DigitalOutputDevice
+from gpiozero.pins.lgpio import LGPIOFactory
 
 class StepperMotor:
-    def __init__(self, pi, dir_pin, step_pin, delay=0.001):
-        """
-        :param pi: pigpio.pi() instance
-        :param dir_pin: GPIO pin for DIR−
-        :param step_pin: GPIO pin for PUL−
-        :param delay: time between steps (controls speed)
-        """
-        self.pi = pi
-        self.dir_pin = dir_pin
-        self.step_pin = step_pin
+    def __init__(self, dir_pin, pul_pin, delay=0.001):
+        # Use LGPIOFactory for non-root access on Pi 5
+        self.factory = LGPIOFactory()
+        self.dir = DigitalOutputDevice(dir_pin, pin_factory=self.factory)
+        self.pul = DigitalOutputDevice(pul_pin, pin_factory=self.factory)
         self.delay = delay
 
-        pi.set_mode(self.dir_pin, pigpio.OUTPUT)
-        pi.set_mode(self.step_pin, pigpio.OUTPUT)
-
-    def move(self, steps, direction='forward'):
-        self.pi.write(self.dir_pin, 1 if direction == 'forward' else 0)
+    def step(self, steps, direction='forward'):
+        self.dir.value = 1 if direction == 'forward' else 0
         for _ in range(steps):
-            self.pi.write(self.step_pin, 1)
+            self.pul.on()
             time.sleep(self.delay)
-            self.pi.write(self.step_pin, 0)
+            self.pul.off()
             time.sleep(self.delay)
 
     def cleanup(self):
-        self.pi.write(self.dir_pin, 0)
-        self.pi.write(self.step_pin, 0)
-
-
+        self.dir.close()
+        self.pul.close()
 
 app = Flask(__name__)
 
