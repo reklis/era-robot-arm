@@ -49,8 +49,7 @@ atexit.register(cleanup_gpio)
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-pi = pigpio.pi()
-m1 = StepperMotor(pi, dir_pin=17, step_pin=27)
+m1 = StepperMotor(dir_pin=17, pul_pin=27)
 
 @app.route('/')
 def index():
