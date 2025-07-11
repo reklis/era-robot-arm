@@ -1,12 +1,12 @@
---- pigpio.c	2025-07-11 20:00:00.000000000 +0000
-+++ pigpio.c	2025-07-11 20:15:00.000000000 +0000
-@@ -877,6 +877,10 @@
-    if (rev == 0xa02082) return 3;  // Pi 3 Model B
-    if (rev == 0xa22082) return 3;  // Pi 3 Model B (Sony)
-    if (rev == 0xa32082) return 3;  // Pi 3 Model B (Embest)
-+
-+   // Raspberry Pi 5
-+   if (rev == 0xd03170) return 5;  // Pi 5 (variant)
-+   if (rev == 0xd04170) return 5;  // Pi 5 (variant)
+--- pigpio.c
++++ pigpio.c
+@@ -1254,6 +1254,10 @@
+    if (rev == 0xa22082) return 2;  // Pi 3 Model B (Sony)
+    if (rev == 0xa32082) return 2;  // Pi 3 Model B (Embest)
+
++   // Raspberry Pi 5 support
++   if (rev == 0xd03170) return 2;
++   if (rev == 0xd04170) return 2;
 +
     return 0;
+ }
