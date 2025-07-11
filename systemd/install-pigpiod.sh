@@ -2,6 +2,7 @@
 
 if [ -d "pigpio" ]; then
     rm -rf pigpio
+fi
 
 git clone https://github.com/joan2937/pigpio.git
 cd pigpio
