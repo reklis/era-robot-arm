@@ -10,4 +10,3 @@
 +   if (rev == 0xd04170) return 5;  // Pi 5 (variant)
 +
     return 0;
- }
