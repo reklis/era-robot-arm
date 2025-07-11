@@ -4,7 +4,7 @@ After=network.target syslog.target
 Wants=network.target
 
 [Service]
-ExecStart=/usr/local/bin/pigpiod -x /dev/null
+ExecStart=/usr/local/bin/pigpiod
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 Type=simple
