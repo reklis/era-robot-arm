@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
+if [ -d "pigpio" ]; then
+    rm -rf pigpio
+
 git clone https://github.com/joan2937/pigpio.git
 cd pigpio
+
+patch -p1 < ../pi5.patch
+
 make
 sudo make install
 

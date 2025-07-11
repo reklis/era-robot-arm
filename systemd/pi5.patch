@@ -1,0 +1,15 @@
+--- pigpio.c.orig	2025-07-11 20:00:00.000000000 +0000
++++ pigpio.c	2025-07-11 20:15:00.000000000 +0000
+@@ -889,6 +889,10 @@
+    // existing revision detection block
+    if (rev == 0xa02082) return 3;  // Pi 3 Model B
+    if (rev == 0xa22082) return 3;  // Pi 3 Model B (Sony)
+    if (rev == 0xa32082) return 3;  // Pi 3 Model B (Embest)
++
++   // Raspberry Pi 5 (4GB/8GB board)
++   if (rev == 0xd04170) return 5;  // Pi 5 4GB/8GB
++   if (rev == 0xd03170) return 5;  // Pi 5 (alternate rev)
++
+    // fallback
+    return 0;
+ }
