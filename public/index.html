@@ -67,54 +67,19 @@
 <body>
     <div class="container">
         <h1>ERA Robot Arm Control</h1>
-        
-        <div class="led-control">
-            <button class="led-button led-on" onclick="controlLED('on')">Turn LED ON</button>
-            <button class="led-button led-off" onclick="controlLED('off')">Turn LED OFF</button>
-        </div>
-        
-        <div id="status" class="status off">
-            LED Status: OFF
-        </div>
 
-        <div class="claw-control">
-            <input type="range" min="-1" max="1" value="0" class="claw-slider" id="clawSlider">
-            <button class="claw-button" onclick="controlClaw(1)">Open Claw</button>
-            <button class="claw-button" onclick="controlClaw(-1)">Close Claw</button>
+        <div class="m1-control">
+            <button class="m1-button" onmousedown="controlM1('forward')">Move M1 Forward</button>
+            <button class="m1-button" onmousedown="controlM1('backward')">Move M1 Backward</button>
         </div>
         
     </div>
 
     <script>
-        const clawSlider = document.getElementById('clawSlider');
-        clawSlider.addEventListener('input', function() {
-            controlClaw(this.value);
-        });
-
-        function controlLED(action) {
-            fetch(`/led/${action}`, {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                const statusDiv = document.getElementById('status');
-                if (data.success) {
-                    statusDiv.textContent = `LED Status: ${action.toUpperCase()}`;
-                    statusDiv.className = `status ${action}`;
-                } else {
-                    alert('Error controlling LED: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error controlling LED');
-            });
-        }
-
-        function controlClaw(action) {
-            fetch(`/claw`, {
+        function controlM1(action) {
+            fetch(`/m1/move`, {
                 method: 'POST',
-                body: JSON.stringify({ value: action })
+                body: JSON.stringify({ steps: 1, direction: action })
             })
             .then(response => response.json())
             .then(data => {
