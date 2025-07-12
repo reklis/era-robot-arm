@@ -70,6 +70,15 @@ def set_claw():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     
+@app.route('/m1/test', methods=['POST'])
+def test_m1():
+    try:
+        m1.step(200, 'forward')
+        m1.step(200, 'backward')
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/m1/move', methods=['POST'])
 def move_m1():
     try:

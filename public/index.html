@@ -72,6 +72,10 @@
             <button class="m1-button" onmousedown="startM1('forward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Forward</button>
             <button class="m1-button" onmousedown="startM1('backward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Backward</button>
         </div>
+
+        <div class="m1-control">
+            <button class="m1-button" onclick="testM1()">Test M1</button>
+        </div>
         
     </div>
 
@@ -112,6 +116,13 @@
             .catch(error => {
                 console.error('Error:', error);
             });
+        }
+
+        function testM1() {
+            fetch(`/m1/test`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
         }
     </script>
 </body>
