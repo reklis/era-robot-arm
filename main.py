@@ -4,18 +4,19 @@ import signal
 import atexit
 import time
 from gpiozero import DigitalOutputDevice
-from gpiozero.pins.lgpio import LGPIOFactory
 
 class StepperMotor:
     def __init__(self, dir_pin, pul_pin, delay=0.001):
-        # Use LGPIOFactory for non-root access on Pi 5
-        self.factory = LGPIOFactory()
-        self.dir = DigitalOutputDevice(dir_pin, pin_factory=self.factory)
-        self.pul = DigitalOutputDevice(pul_pin, pin_factory=self.factory)
+        self.dir = DigitalOutputDevice(dir_pin)
+        self.pul = DigitalOutputDevice(pul_pin)
         self.delay = delay
 
     def step(self, steps, direction='forward'):
-        self.dir.value = 1 if direction == 'forward' else 0
+        if direction == 'forward':
+            self.dir.on()
+        else:
+            self.dir.off()
+
         for _ in range(steps):
             self.pul.on()
             time.sleep(self.delay)
