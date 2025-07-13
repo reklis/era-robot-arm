@@ -3,7 +3,7 @@ import os
 import signal
 import atexit
 import time
-from gpiozero import DigitalOutputDevice
+from gpiozero import DigitalOutputDevice, Servo
 
 class StepperMotor:
     def __init__(self, dir_pin, pul_pin, delay=0.001):
@@ -51,6 +51,7 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 m1 = StepperMotor(dir_pin=17, pul_pin=27)
+base = Servo(12)
 
 @app.route('/')
 def index():
@@ -60,12 +61,12 @@ def index():
 def static_files(filename):
     return send_from_directory('public', filename)
 
-@app.route('/claw', methods=['POST'])
-def set_claw():
+@app.route('/base', methods=['POST'])
+def set_base():
     try:
         value = float(request.json.get('value'))
         value = max(-1.0, min(1.0, value))  # Clamp
-        claw.value = value
+        base.value = value
         return jsonify({'success': True, 'value': value})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

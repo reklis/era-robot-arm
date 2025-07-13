@@ -4,80 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERA Robot Arm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-sans max-w-4xl mx-auto p-5 bg-gray-100">
+    <div class="bg-white p-8 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">ERA Robot Arm Control</h1>
+
+        <div class="text-center mb-8">
+            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg mr-4 transition-colors duration-200" onmousedown="startM1('forward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Forward</button>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200" onmousedown="startM1('backward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Backward</button>
+        </div>
+
+        <div class="text-center mb-8 p-6 bg-gray-50 rounded-lg">
+            <div class="font-bold text-gray-700 mb-4">Base Servo Control</div>
+            <div class="flex items-center justify-center gap-5 mb-4">
+                <span class="text-gray-600">-90°</span>
+                <input type="range" id="baseSlider" class="w-48 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" min="-1" max="1" value="0" step="0.1" oninput="controlBase(this.value)">
+                <span class="text-gray-600">+90°</span>
+            </div>
+            <div class="mt-3">
+                <span class="text-xs text-gray-500">-1 = -90°, 0 = Center, +1 = +90°</span>
+            </div>
+            <div class="mt-3 flex items-center justify-center gap-5">
+                <span class="font-bold text-gray-800 min-w-10" id="baseSliderValue">0</span>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200" onclick="centerBase()">Center Base</button>
+        </div>
+    </div>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .led-control {
-            text-align: center;
-            margin: 30px 0;
-        }
-        .led-button {
-            padding: 15px 30px;
-            font-size: 18px;
-            margin: 10px;
-            border: none;
-            border-radius: 5px;
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-        .led-on {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .led-off {
-            background-color: #f44336;
-            color: white;
-        }
-        .led-button:hover {
-            opacity: 0.8;
-        }
-        .status {
-            text-align: center;
-            margin: 20px 0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .status.on {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .status.off {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            border: none;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>ERA Robot Arm Control</h1>
-
-        <div class="m1-control">
-            <button class="m1-button" onmousedown="startM1('forward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Forward</button>
-            <button class="m1-button" onmousedown="startM1('backward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Backward</button>
-        </div>
-
-        <div class="m1-control">
-            <button class="m1-button" onclick="testM1()">Test M1</button>
-        </div>
-        
-    </div>
 
     <script>
         let m1Interval = null;
@@ -99,15 +75,21 @@
                 m1Interval = null;
                 currentDirection = null;
             }
+            // Reset slider to center
+            const slider = document.getElementById('m1Slider');
+            if (slider) {
+                slider.value = 0;
+                document.getElementById('m1SliderValue').textContent = '0';
+            }
         }
 
-        function controlM1(action) {
+        function controlM1(action, steps = 10) {
             fetch(`/m1/move`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ steps: 10, direction: action })
+                body: JSON.stringify({ steps: steps, direction: action })
             })
             .then(response => response.json())
             .then(data => {
@@ -118,11 +100,30 @@
             });
         }
 
-        function testM1() {
-            fetch(`/m1/test`, {
-                method: 'POST'
+        function controlBase(value) {
+            const f = parseFloat(value);
+            document.getElementById('baseSliderValue').textContent = f.toFixed(1);
+            fetch(`/base`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value: f })
             })
             .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function centerBase() {
+            const slider = document.getElementById('baseSlider');
+            slider.value = 0;
+            document.getElementById('baseSliderValue').textContent = '0.0';
+            controlBase(0);
         }
     </script>
 </body>
