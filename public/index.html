@@ -107,7 +107,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ steps: 1, direction: action })
+                body: JSON.stringify({ steps: 10, direction: action })
             })
             .then(response => response.json())
             .then(data => {
