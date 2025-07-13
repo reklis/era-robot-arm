@@ -51,7 +51,7 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 m1 = StepperMotor(dir_pin=17, pul_pin=27)
-base = Servo(12)
+base = Servo(13)
 
 @app.route('/')
 def index():
