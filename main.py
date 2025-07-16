@@ -52,6 +52,7 @@ signal.signal(signal.SIGTERM, signal_handler)
 
 m1 = StepperMotor(dir_pin=17, pul_pin=27)
 base = Servo(13)
+claw = Servo(12)
 
 @app.route('/')
 def index():
@@ -71,6 +72,16 @@ def set_base():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     
+@app.route('/claw', methods=['POST'])
+def set_claw():
+    try:
+        value = float(request.json.get('value'))
+        value = max(-1.0, min(1.0, value))  # Clamp
+        claw.value = value
+        return jsonify({'success': True, 'value': value})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/m1/test', methods=['POST'])
 def test_m1():
     try:
