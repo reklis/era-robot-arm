@@ -35,6 +35,8 @@ def cleanup_gpio():
     """Clean up GPIO resources"""
     try:
         m1.cleanup()
+        wrist.close()
+        claw.close()
         print("GPIO resources cleaned up successfully")
     except Exception as e:
         print(f"Error during GPIO cleanup: {e}")
@@ -51,7 +53,7 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 m1 = StepperMotor(dir_pin=17, pul_pin=27)
-base = Servo(13)
+wrist = Servo(13)
 claw = Servo(12)
 
 @app.route('/')
@@ -62,12 +64,12 @@ def index():
 def static_files(filename):
     return send_from_directory('public', filename)
 
-@app.route('/base', methods=['POST'])
-def set_base():
+@app.route('/wrist', methods=['POST'])
+def set_wrist():
     try:
         value = float(request.json.get('value'))
         value = max(-1.0, min(1.0, value))  # Clamp
-        base.value = value
+        wrist.value = value
         return jsonify({'success': True, 'value': value})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

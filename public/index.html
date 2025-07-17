@@ -16,22 +16,22 @@
         </div>
 
         <div class="text-center mb-8 p-6 bg-gray-50 rounded-lg">
-            <div class="font-bold text-gray-700 mb-4">Base Servo Control</div>
+            <div class="font-bold text-gray-700 mb-4">Wrist Servo Control</div>
             <div class="flex items-center justify-center gap-5 mb-4">
                 <span class="text-gray-600">-90°</span>
-                <input type="range" id="baseSlider" class="w-48 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" min="-1" max="1" value="0" step="0.1" oninput="controlBase(this.value)">
+                <input type="range" id="wristSlider" class="w-48 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" min="-1" max="1" value="0" step="0.1" oninput="controlWrist(this.value)">
                 <span class="text-gray-600">+90°</span>
             </div>
             <div class="mt-3">
                 <span class="text-xs text-gray-500">-1 = -90°, 0 = Center, +1 = +90°</span>
             </div>
             <div class="mt-3 flex items-center justify-center gap-5">
-                <span class="font-bold text-gray-800 min-w-10" id="baseSliderValue">0</span>
+                <span class="font-bold text-gray-800 min-w-10" id="wristSliderValue">0</span>
             </div>
         </div>
 
         <div class="text-center">
-            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200" onclick="centerBase()">Center Base</button>
+            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200" onclick="centerWrist()">Center Wrist</button>
         </div>
 
 
@@ -120,10 +120,10 @@
             });
         }
 
-        function controlBase(value) {
+        function controlWrist(value) {
             const f = parseFloat(value);
-            document.getElementById('baseSliderValue').textContent = f.toFixed(1);
-            fetch(`/base`, {
+            document.getElementById('wristSliderValue').textContent = f.toFixed(1);
+            fetch(`/wrist`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -139,11 +139,11 @@
             });
         }
 
-        function centerBase() {
-            const slider = document.getElementById('baseSlider');
+        function centerWrist() {
+            const slider = document.getElementById('wristSlider');
             slider.value = 0;
-            document.getElementById('baseSliderValue').textContent = '0.0';
-            controlBase(0);
+            document.getElementById('wristSliderValue').textContent = '0.0';
+            controlWrist(0);
         }
 
         function controlClaw(value) {
