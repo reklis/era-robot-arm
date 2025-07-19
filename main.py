@@ -82,11 +82,11 @@ atexit.register(cleanup_gpio)
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-m1 = StepperMotor(dir_pin=5, pul_pin=6)
-m2 = StepperMotor(dir_pin=16, pul_pin=20)
-m3 = StepperMotor(dir_pin=17, pul_pin=27)
-m4 = StepperMotor(dir_pin=22, pul_pin=23)
-m5 = StepperMotor(dir_pin=24, pul_pin=25)
+m1 = StepperMotor(dir_pin=5, pul_pin=6)    # j1 left
+m2 = StepperMotor(dir_pin=16, pul_pin=20)  # j1 right
+m3 = StepperMotor(dir_pin=17, pul_pin=27)  # base
+m4 = StepperMotor(dir_pin=22, pul_pin=23)  # j2
+m5 = StepperMotor(dir_pin=24, pul_pin=25)  # j3
 
 motors = [m1, m2, m3, m4, m5]
 
