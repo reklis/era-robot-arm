@@ -3,6 +3,7 @@ import os
 import signal
 import atexit
 import time
+import threading
 from gpiozero import DigitalOutputDevice, Servo
 
 class StepperMotor:
@@ -10,6 +11,9 @@ class StepperMotor:
         self.dir = DigitalOutputDevice(dir_pin)
         self.pul = DigitalOutputDevice(pul_pin)
         self.delay = delay
+        self.running = threading.Event()
+        self.direction = 'forward'
+        self.thread = None
 
     def step(self, steps, direction='forward'):
         if direction == 'forward':
@@ -23,7 +27,32 @@ class StepperMotor:
             self.pul.off()
             time.sleep(self.delay)
 
+    def continuous_step(self):
+        while True:
+            if self.running.is_set():
+                if self.direction == 'forward':
+                    self.dir.on()
+                else:
+                    self.dir.off()
+                
+                self.pul.on()
+                time.sleep(self.delay)
+                self.pul.off()
+                time.sleep(self.delay)
+            else:
+                time.sleep(0.01)
+
+    def start_continuous(self, direction='forward'):
+        self.direction = direction
+        self.running.set()
+
+    def stop_continuous(self):
+        self.running.clear()
+
     def cleanup(self):
+        self.running.clear()
+        if self.thread and self.thread.is_alive():
+            self.thread.join(timeout=1)
         self.dir.close()
         self.pul.close()
 
@@ -34,7 +63,8 @@ app = Flask(__name__)
 def cleanup_gpio():
     """Clean up GPIO resources"""
     try:
-        m1.cleanup()
+        for motor in motors:
+            motor.cleanup()
         wrist.close()
         claw.close()
         print("GPIO resources cleaned up successfully")
@@ -52,7 +82,18 @@ atexit.register(cleanup_gpio)
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-m1 = StepperMotor(dir_pin=17, pul_pin=27)
+m1 = StepperMotor(dir_pin=5, pul_pin=6)
+m2 = StepperMotor(dir_pin=16, pul_pin=20)
+m3 = StepperMotor(dir_pin=17, pul_pin=27)
+m4 = StepperMotor(dir_pin=22, pul_pin=23)
+m5 = StepperMotor(dir_pin=24, pul_pin=25)
+
+motors = [m1, m2, m3, m4, m5]
+
+for motor in motors:
+    motor.thread = threading.Thread(target=motor.continuous_step, daemon=True)
+    motor.thread.start()
+
 wrist = Servo(13)
 claw = Servo(12)
 
@@ -84,20 +125,68 @@ def set_claw():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/m1/test', methods=['POST'])
-def test_m1():
+@app.route('/m1', methods=['POST'])
+def control_m1():
     try:
-        m1.step(200, 'forward')
-        m1.step(200, 'backward')
-        return jsonify({'success': True})
+        enabled = bool(request.json.get('enabled'))
+        direction = request.json.get('direction', 'forward')
+        if enabled:
+            m1.start_continuous(direction)
+        else:
+            m1.stop_continuous()
+        return jsonify({'success': True, 'enabled': enabled})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/m1/move', methods=['POST'])
-def move_m1():
+@app.route('/m2', methods=['POST'])
+def control_m2():
     try:
-        m1.step(request.json.get('steps'), request.json.get('direction'))
-        return jsonify({'success': True})
+        enabled = bool(request.json.get('enabled'))
+        direction = request.json.get('direction', 'forward')
+        if enabled:
+            m2.start_continuous(direction)
+        else:
+            m2.stop_continuous()
+        return jsonify({'success': True, 'enabled': enabled})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/m3', methods=['POST'])
+def control_m3():
+    try:
+        enabled = bool(request.json.get('enabled'))
+        direction = request.json.get('direction', 'forward')
+        if enabled:
+            m3.start_continuous(direction)
+        else:
+            m3.stop_continuous()
+        return jsonify({'success': True, 'enabled': enabled})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/m4', methods=['POST'])
+def control_m4():
+    try:
+        enabled = bool(request.json.get('enabled'))
+        direction = request.json.get('direction', 'forward')
+        if enabled:
+            m4.start_continuous(direction)
+        else:
+            m4.stop_continuous()
+        return jsonify({'success': True, 'enabled': enabled})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/m5', methods=['POST'])
+def control_m5():
+    try:
+        enabled = bool(request.json.get('enabled'))
+        direction = request.json.get('direction', 'forward')
+        if enabled:
+            m5.start_continuous(direction)
+        else:
+            m5.stop_continuous()
+        return jsonify({'success': True, 'enabled': enabled})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
