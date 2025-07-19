@@ -125,29 +125,24 @@ def set_claw():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/m1', methods=['POST'])
-def control_m1():
+@app.route('/base', methods=['POST'])
+def control_base():
     try:
         enabled = bool(request.json.get('enabled'))
         direction = request.json.get('direction', 'forward')
+        
         if enabled:
-            m1.start_continuous(direction)
+            if direction == 'forward':
+                m1.start_continuous('forward')
+                m2.start_continuous('backward')
+            else:
+                m1.start_continuous('backward')
+                m2.start_continuous('forward')
         else:
             m1.stop_continuous()
-        return jsonify({'success': True, 'enabled': enabled})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/m2', methods=['POST'])
-def control_m2():
-    try:
-        enabled = bool(request.json.get('enabled'))
-        direction = request.json.get('direction', 'forward')
-        if enabled:
-            m2.start_continuous(direction)
-        else:
             m2.stop_continuous()
-        return jsonify({'success': True, 'enabled': enabled})
+            
+        return jsonify({'success': True, 'enabled': enabled, 'direction': direction})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
