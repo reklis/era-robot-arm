@@ -125,8 +125,8 @@ def set_claw():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/base', methods=['POST'])
-def control_base():
+@app.route('/j1', methods=['POST'])
+def control_j1():
     try:
         enabled = bool(request.json.get('enabled'))
         direction = request.json.get('direction', 'forward')
