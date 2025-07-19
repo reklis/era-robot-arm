@@ -2,176 +2,345 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ERA Robot Arm</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="font-sans max-w-4xl mx-auto p-5 bg-gray-100">
-    <div class="bg-white p-8 rounded-lg shadow-lg">
-        <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">ERA Robot Arm Control</h1>
-
-        <div class="text-center mb-8">
-            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg mr-4 transition-colors duration-200" onmousedown="startM1('forward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Forward</button>
-            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200" onmousedown="startM1('backward')" onmouseup="stopM1()" onmouseleave="stopM1()">Move M1 Backward</button>
-        </div>
-
-        <div class="text-center mb-8 p-6 bg-gray-50 rounded-lg">
-            <div class="font-bold text-gray-700 mb-4">Wrist Servo Control</div>
-            <div class="flex items-center justify-center gap-5 mb-4">
-                <span class="text-gray-600">-90°</span>
-                <input type="range" id="wristSlider" class="w-48 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" min="-1" max="1" value="0" step="0.1" oninput="controlWrist(this.value)">
-                <span class="text-gray-600">+90°</span>
-            </div>
-            <div class="mt-3">
-                <span class="text-xs text-gray-500">-1 = -90°, 0 = Center, +1 = +90°</span>
-            </div>
-            <div class="mt-3 flex items-center justify-center gap-5">
-                <span class="font-bold text-gray-800 min-w-10" id="wristSliderValue">0</span>
-            </div>
-        </div>
-
-        <div class="text-center">
-            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200" onclick="centerWrist()">Center Wrist</button>
-        </div>
-
-
-        <div class="text-center mb-8 p-6 bg-gray-50 rounded-lg">
-            <div class="font-bold text-gray-700 mb-4">Claw Servo Control</div>
-            <div class="flex items-center justify-center gap-5 mb-4">
-                <span class="text-gray-600">-90°</span>
-                <input type="range" id="clawSlider" class="w-48 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" min="-1" max="1" value="0" step="0.1" oninput="controlClaw(this.value)">
-                <span class="text-gray-600">+90°</span>
-            </div>
-            <div class="mt-3">
-                <span class="text-xs text-gray-500">-1 = -90°, 0 = Center, +1 = +90°</span>
-            </div>
-            <div class="mt-3 flex items-center justify-center gap-5">
-                <span class="font-bold text-gray-800 min-w-10" id="clawSliderValue">0</span>
-            </div>
-        </div>
-
-        <div class="text-center">
-            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200" onclick="centerClaw()">Center Claw</button>
-        </div>
-    </div>
-
     <style>
+        body {
+            overscroll-behavior: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .d-pad {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #e2e8f0, #cbd5e1);
+            box-shadow: 8px 8px 16px #a1a1aa, -8px -8px 16px #ffffff;
+            position: relative;
+            touch-action: none;
+        }
+        
+        .d-pad-center {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #94a3b8, #64748b);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+        }
+        
+        .d-pad.active .d-pad-center {
+            background: linear-gradient(145deg, #3b82f6, #1d4ed8);
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .slider-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+        }
+        
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background: #10b981;
+            background: #3b82f6;
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
+        
         .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background: #10b981;
+            background: #3b82f6;
             cursor: pointer;
             border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
     </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex flex-col h-screen">
+        <!-- Header -->
+        <div class="bg-blue-600 text-white p-4 shadow-lg">
+            <h1 class="text-xl font-bold text-center">ERA Robot Arm</h1>
+        </div>
+
+        <!-- Servo Controls -->
+        <div class="flex-1 p-4 space-y-4">
+            <!-- Wrist Control -->
+            <div class="slider-container">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-semibold text-gray-700">Wrist</span>
+                    <span class="text-blue-600 font-mono" id="wristValue">0.0</span>
+                </div>
+                <input type="range" id="wristSlider" class="slider" 
+                       min="-1" max="1" value="0" step="0.1" 
+                       oninput="controlWrist(this.value)">
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>-90°</span>
+                    <span>Center</span>
+                    <span>+90°</span>
+                </div>
+            </div>
+
+            <!-- Claw Control -->
+            <div class="slider-container">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-semibold text-gray-700">Claw</span>
+                    <span class="text-blue-600 font-mono" id="clawValue">0.0</span>
+                </div>
+                <input type="range" id="clawSlider" class="slider" 
+                       min="-1" max="1" value="0" step="0.1" 
+                       oninput="controlClaw(this.value)">
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Closed</span>
+                    <span>Half</span>
+                    <span>Open</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- D-Pad Controls -->
+        <div class="bg-white p-6 shadow-lg">
+            <div class="flex justify-between items-center">
+                <!-- Left D-Pad -->
+                <div class="text-center">
+                    <div class="text-sm font-semibold text-gray-600 mb-2">Base / J1</div>
+                    <div class="d-pad" id="leftDPad" 
+                         ontouchstart="handleDPadStart(event, 'left')"
+                         ontouchmove="handleDPadMove(event, 'left')"
+                         ontouchend="handleDPadEnd('left')"
+                         onmousedown="handleDPadStart(event, 'left')"
+                         onmousemove="handleDPadMove(event, 'left')"
+                         onmouseup="handleDPadEnd('left')"
+                         onmouseleave="handleDPadEnd('left')">
+                        <div class="d-pad-center"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">X: Base<br>Y: J1</div>
+                </div>
+
+                <!-- Right D-Pad -->
+                <div class="text-center">
+                    <div class="text-sm font-semibold text-gray-600 mb-2">J2 / J3</div>
+                    <div class="d-pad" id="rightDPad"
+                         ontouchstart="handleDPadStart(event, 'right')"
+                         ontouchmove="handleDPadMove(event, 'right')"
+                         ontouchend="handleDPadEnd('right')"
+                         onmousedown="handleDPadStart(event, 'right')"
+                         onmousemove="handleDPadMove(event, 'right')"
+                         onmouseup="handleDPadEnd('right')"
+                         onmouseleave="handleDPadEnd('right')">
+                        <div class="d-pad-center"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">X: J2<br>Y: J3</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        let m1Interval = null;
-        let currentDirection = null;
+        let motorStates = {
+            m3: false,
+            j1: false,
+            m4: false,
+            m5: false
+        };
 
-        function startM1(direction) {
-            if (m1Interval) return; // Already running
-            
-            currentDirection = direction;
-            // Start continuous movement
-            m1Interval = setInterval(() => {
-                controlM1(direction);
-            }, 50); // Send command every 50ms for smooth movement
-        }
-
-        function stopM1() {
-            if (m1Interval) {
-                clearInterval(m1Interval);
-                m1Interval = null;
-                currentDirection = null;
-            }
-            // Reset slider to center
-            const slider = document.getElementById('m1Slider');
-            if (slider) {
-                slider.value = 0;
-                document.getElementById('m1SliderValue').textContent = '0';
-            }
-        }
-
-        function controlM1(action, steps = 10) {
-            fetch(`/m1/move`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ steps: steps, direction: action })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+        let dpadActive = {
+            left: false,
+            right: false
+        };
 
         function controlWrist(value) {
             const f = parseFloat(value);
-            document.getElementById('wristSliderValue').textContent = f.toFixed(1);
-            fetch(`/wrist`, {
+            document.getElementById('wristValue').textContent = f.toFixed(1);
+            fetch('/wrist', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: f })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-        function centerWrist() {
-            const slider = document.getElementById('wristSlider');
-            slider.value = 0;
-            document.getElementById('wristSliderValue').textContent = '0.0';
-            controlWrist(0);
+            }).catch(error => console.error('Error:', error));
         }
 
         function controlClaw(value) {
             const f = parseFloat(value);
-            document.getElementById('clawSliderValue').textContent = f.toFixed(1);
-            fetch(`/claw`, {
+            document.getElementById('clawValue').textContent = f.toFixed(1);
+            fetch('/claw', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: f })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+            }).catch(error => console.error('Error:', error));
         }
 
-        function centerClaw() {
-            const slider = document.getElementById('clawSlider');
-            slider.value = 0;
-            document.getElementById('clawSliderValue').textContent = '0.0';
-            controlClaw(0);
+        function controlMotor(endpoint, enabled, direction = 'forward') {
+            fetch(`/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled: enabled, direction: direction })
+            }).catch(error => console.error('Error:', error));
         }
+
+        function getDPadPosition(event, dpadElement) {
+            const rect = dpadElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            let clientX, clientY;
+            if (event.touches && event.touches[0]) {
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
+            
+            const x = (clientX - centerX) / (rect.width / 2);
+            const y = (clientY - centerY) / (rect.height / 2);
+            
+            // Clamp to circle
+            const distance = Math.sqrt(x * x + y * y);
+            if (distance > 1) {
+                return { x: x / distance, y: y / distance };
+            }
+            return { x, y };
+        }
+
+        function handleDPadStart(event, side) {
+            event.preventDefault();
+            dpadActive[side] = true;
+            document.getElementById(side + 'DPad').classList.add('active');
+            handleDPadMove(event, side);
+        }
+
+        function handleDPadMove(event, side) {
+            if (!dpadActive[side]) return;
+            event.preventDefault();
+            
+            const dpad = document.getElementById(side + 'DPad');
+            const pos = getDPadPosition(event, dpad);
+            
+            const threshold = 0.3;
+            
+            if (side === 'left') {
+                // Left D-Pad: X = m3 (base), Y = j1
+                
+                // X-axis control (m3 - base)
+                if (Math.abs(pos.x) > threshold) {
+                    const direction = pos.x > 0 ? 'forward' : 'backward';
+                    if (!motorStates.m3 || motorStates.m3 !== direction) {
+                        controlMotor('m3', true, direction);
+                        motorStates.m3 = direction;
+                    }
+                } else if (motorStates.m3) {
+                    controlMotor('m3', false);
+                    motorStates.m3 = false;
+                }
+                
+                // Y-axis control (j1)
+                if (Math.abs(pos.y) > threshold) {
+                    const direction = pos.y < 0 ? 'forward' : 'backward'; // Inverted Y
+                    if (!motorStates.j1 || motorStates.j1 !== direction) {
+                        controlMotor('j1', true, direction);
+                        motorStates.j1 = direction;
+                    }
+                } else if (motorStates.j1) {
+                    controlMotor('j1', false);
+                    motorStates.j1 = false;
+                }
+            } else {
+                // Right D-Pad: X = m4 (j2), Y = m5 (j3)
+                
+                // X-axis control (m4 - j2)
+                if (Math.abs(pos.x) > threshold) {
+                    const direction = pos.x > 0 ? 'forward' : 'backward';
+                    if (!motorStates.m4 || motorStates.m4 !== direction) {
+                        controlMotor('m4', true, direction);
+                        motorStates.m4 = direction;
+                    }
+                } else if (motorStates.m4) {
+                    controlMotor('m4', false);
+                    motorStates.m4 = false;
+                }
+                
+                // Y-axis control (m5 - j3)
+                if (Math.abs(pos.y) > threshold) {
+                    const direction = pos.y < 0 ? 'forward' : 'backward'; // Inverted Y
+                    if (!motorStates.m5 || motorStates.m5 !== direction) {
+                        controlMotor('m5', true, direction);
+                        motorStates.m5 = direction;
+                    }
+                } else if (motorStates.m5) {
+                    controlMotor('m5', false);
+                    motorStates.m5 = false;
+                }
+            }
+        }
+
+        function handleDPadEnd(side) {
+            dpadActive[side] = false;
+            document.getElementById(side + 'DPad').classList.remove('active');
+            
+            if (side === 'left') {
+                if (motorStates.m3) {
+                    controlMotor('m3', false);
+                    motorStates.m3 = false;
+                }
+                if (motorStates.j1) {
+                    controlMotor('j1', false);
+                    motorStates.j1 = false;
+                }
+            } else {
+                if (motorStates.m4) {
+                    controlMotor('m4', false);
+                    motorStates.m4 = false;
+                }
+                if (motorStates.m5) {
+                    controlMotor('m5', false);
+                    motorStates.m5 = false;
+                }
+            }
+        }
+
+        // Prevent context menu on touch
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Prevent scrolling when touching d-pads
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.closest('.d-pad')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('.d-pad')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
-
 </body>
-</html> 
+</html>
