@@ -67,6 +67,8 @@ http://localhost:5000
 
 ## Hardware Setup
 
+![ERA Robot Arm Schematic](schematic.png)
+
 ### Stepper Motors
 - **M1 (J1 Left)**: DIR=GPIO 5, PUL=GPIO 6
 - **M2 (J1 Right)**: DIR=GPIO 16, PUL=GPIO 20
